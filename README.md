@@ -1,0 +1,5 @@
+cookieのキャッシュを用いたログインAPIシステムとそれに付随するフロントエンドです。
+NODEJSで作られており、外部モジュールとして,express,bcrypt,jsonwebtoken,dotenvを利用しています。
+利用する際は
+npm install express bcrypt jsonwebtoken dotenv
+を実行して下さい。
