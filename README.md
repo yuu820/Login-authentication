@@ -2,9 +2,9 @@
 外部サービスへのユーザー認証に利用することを想定して作られており、cookieを用いて外部サービスへのユーザー認証に利用できるようにしています。
 ユーザーは新規会員登録画面でユーザーネームとパスワードを決め、それを用いてログインを行います。
 ユーザーは「認証状態を確認」のボタンを押すことでcookieが正常に動作しているか確認できると共に、ユーザーのUUIDを確認することができます
-NODEJSで作られており、外部モジュールとして,express,bcrypt,jsonwebtoken,dotenv,sqlite3,corsを利用しています。
+NODEJSで作られており、外部モジュールとして,express,bcrypt,jsonwebtoken,dotenv,better-sqlite3,corsを利用しています。
 利用する際は
-npm install express bcrypt jsonwebtoken dotenv sqlite3 cors
+npm install express bcrypt jsonwebtoken dotenv better-sqlite3 cors
 を実行して下さい。
 
 サーバーのバックエンドはserver.jsに書かれており、
