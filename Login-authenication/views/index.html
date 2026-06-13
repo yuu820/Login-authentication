@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login auth</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      h2{
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.2rem;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {        width: 100%;
+        padding: 10px;
+        background-color: #4169e1;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        margin-top: 10px;
+      }
+      button:hover {
+        background-color: #365fbd;
+      }
+      .switch {
+        background-color: #5d00ff;
+        border: none;
+        margin-top: 10px;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      #message {
+        color: #333;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        word-break: break-all;
+      }
+      .hidden {
+        display: none;
+      }
+      .powered{
+        text-align: right;
+        color: #6c757d;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="login-section">
+        <h2>ログイン</h2>
+        <form id="login-form">
+          <input type="text" id="login-username" placeholder="ユーザーネーム" required />
+          <input type="password" id="login-password" placeholder="パスワード" required />
+          <button type="submit">ログイン</button>
+        </form> 
+        <button class="switch" onclick="toggleView('register')">新規登録はこちら</button>
+      </div>
+      <div id="register-section" class="hidden">
+        <h2>新規登録</h2>
+        <form id="register-form">
+          <input type="text" id="reg-username" placeholder="ユーザーネーム" required />
+          <input type="password" id="reg-password" placeholder="パスワード" required />
+          <button type="submit">登録</button>
+        </form>
+        <button class="switch" onclick="toggleView('login')">ログインはこちら</button>
+      </div>
+      <div id="message"></div>
+      <hr style="margin: 20px 0;">
+      <button onclick="checkauth()" style="background-color: #6c757d;">認証状態を確認</button>
+      <div class="powered">
+        <p>powered by yuu</p>
+      </div>
+      
+    </div>
+    <script>
+      // screen change 
+      function toggleView(view) {
+        document.getElementById('message').innerText= '';
+        if (view === 'login') {
+          document.getElementById('login-section').classList.remove('hidden');
+          document.getElementById('register-section').classList.add('hidden');
+        } else {
+          document.getElementById('register-section').classList.remove('hidden');
+          document.getElementById('login-section').classList.add('hidden');
+        }
+      }
+      // register script
+      document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('reg-username').value;
+        const password = document.getElementById('reg-password').value;
+
+        try {
+          const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          const data = await response.json();
+          if(response.ok) {
+            document.getElementById('message').innerText = '登録に成功しました。';
+            setTimeout(() => {
+              toggleView('login');
+            }, 2000);
+          } else {
+          document.getElementById('message').style.color = 'red';
+          document.getElementById('message').innerText = '登録に失敗しました。error:${data.error}';
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      });
+
+      // login script
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+
+        try {
+          const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          const data = await response.json();
+          if(response.ok) {
+            document.getElementById('message').style.color = 'green';
+            document.getElementById('message').innerText ='ログインに成功しました。';
+          } else {
+            document.getElementById('message').style.color = 'red';
+              document.getElementById('message').innerText = 'ログインに失敗しました。error:${data.error}';
+          }
+        } catch (error) {
+          console.error('Error:', error); 
+        }
+      });
+      //. verify check
+      async function checkauth() {
+        try {
+          const response = await fetch('/api/verify');
+          const data = await response.json();
+          if(response.ok) {
+            document.getElementById('message').style.color = 'green';
+            document.getElementById('message').innerText = '認証に成功しました\nようこそ '+data.user.username+' さん\nあなたのUUIDは: ' + data.user.uuid;
+          } else {
+            document.getElementById('message').style.color = 'red';
+            document.getElementById('message').innerText = '認証に失敗しました';
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          document.getElementById('massage').style.color = 'red';
+          document.getElementById('message').innerText = '認証状態の確認に失敗しました。';
+        }
+      }
+    </script>
+  </body>
