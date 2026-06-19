@@ -43,22 +43,13 @@ npm install express bcrypt jsonwebtoken dotenv better-sqlite3 cors ejs
 ## 環境変数
 JWT_SECRET |暗号化キー
 ## ファイル構成
-login-authenication
-
-│ ├──views
-
-│ │   └──index.html
-
-│ ├──.env
-
-│ ├──auth.db
-
-│ ├──db.js
-
-│ ├──package-lock.json
-
-│ ├──package.json
-
-│ └──server.js
-
-└──readme.md
+login-authenication  
+│ ├──views  
+│ │   └──index.html  
+│ ├──.env  
+│ ├──auth.db  
+│ ├──db.js  
+│ ├──package-lock.json  
+│ ├──package.json  
+│ └──server.js  
+└──readme.md  
