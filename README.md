@@ -45,7 +45,7 @@ JWT_SECRET |暗号化キー
 ## ファイル構成
 login-authenication  
 │ ├──views  
-│ │   └──index.html  
+│  │   └──index.html  
 │ ├──.env  
 │ ├──auth.db  
 │ ├──db.js  
