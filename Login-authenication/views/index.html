@@ -4,6 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LeXEiItAAAAACVcLAQsUokKL0YgW8RHS-IzjjHV"></script>
     <title>Login auth</title>
     <style>
       body {
@@ -69,6 +70,7 @@
       <div id="login-section">
         <h2>ログイン</h2>
         <form id="login-form">
+          <input type="hidden" name="recaptcha_response" id="recaptchaResponse">
           <input type="text" id="login-username" placeholder="ユーザーネーム" required />
           <input type="password" id="login-password" placeholder="パスワード" required />
           <button type="submit">ログイン</button>
@@ -78,8 +80,9 @@
       <div id="register-section" class="hidden">
         <h2>新規登録</h2>
         <form id="register-form">
+          <input type="hidden" name="recaptcha_response" id="recaptchaResponse">
           <input type="text" id="reg-username" placeholder="ユーザーネーム" required />
-          <input type="password" id="reg-password" placeholder="パスワード" required />
+          <input type="password" id="reg-password" placeholder="パスワードは8文字以上、大文字、小文字、数字を含む" required />
           <button type="submit">登録</button>
         </form>
         <button class="switch" onclick="toggleView('login')">ログインはこちら</button>
@@ -89,6 +92,7 @@
       <button onclick="checkauth()" style="background-color: #6c757d;">認証状態を確認</button>
       <div class="powered">
         <p>powered by yuu</p>
+        <p>protected by reCAPTCHA</p>
       </div>
       
     </div>
@@ -106,25 +110,31 @@
       }
       // register script
       document.getElementById('register-form').addEventListener('submit', async (e) => {
+        //STOP REQUEST
         e.preventDefault();
         const username = document.getElementById('reg-username').value;
         const password = document.getElementById('reg-password').value;
 
         try {
+          //MAKE RECAPTCHA TOKEN
+          const recaptchaToken = await grecaptcha.enterprise.execute('6LeXEiItAAAAACVcLAQsUokKL0YgW8RHS-IzjjHV', { action: 'signup' });
+          //CONNECT TO API
           const response = await fetch('/api/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password, recaptchaToken })
           });
           const data = await response.json();
+          //HANDLE RESPONSE
           if(response.ok) {
+            document.getElementById('message').style.color = 'green';
             document.getElementById('message').innerText = '登録に成功しました。';
             setTimeout(() => {
               toggleView('login');
             }, 2000);
           } else {
           document.getElementById('message').style.color = 'red';
-          document.getElementById('message').innerText = '登録に失敗しました。error:${data.error}';
+          document.getElementById('message').innerText = data.message;
           }
         } catch (error) {
           console.error('Error:', error);
@@ -133,33 +143,44 @@
 
       // login script
       document.getElementById('login-form').addEventListener('submit', async (e) => {
+        //STOP REQUEST
         e.preventDefault();
         const username = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
-
         try {
+          //MAKE RECAPTCHA TOKEN
+          const recaptchaToken = await grecaptcha.enterprise.execute('6LeXEiItAAAAACVcLAQsUokKL0YgW8RHS-IzjjHV', { action: 'login' });
+          //CONNECT TO API
           const response = await fetch('/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password, recaptchaToken })
           });
           const data = await response.json();
+          //HANDLE RESPONSE
           if(response.ok) {
             document.getElementById('message').style.color = 'green';
             document.getElementById('message').innerText ='ログインに成功しました。';
+            const verifyRes=await fetch("/api/verify");
+            const verifyData=await verifyRes.json();
+            if (verifyData.user && verifyData.user.role === "admin") {
+                window.location.href = "/admin.html";
+            }
           } else {
             document.getElementById('message').style.color = 'red';
-              document.getElementById('message').innerText = 'ログインに失敗しました。error:${data.error}';
+            document.getElementById('message').innerText = data.message;
           }
         } catch (error) {
           console.error('Error:', error); 
         }
       });
-      //. verify check
+      // VERIFY CHECK
       async function checkauth() {
         try {
+          //CONNECT TO API
           const response = await fetch('/api/verify');
           const data = await response.json();
+          //HANDLE RESPONSE
           if(response.ok) {
             document.getElementById('message').style.color = 'green';
             document.getElementById('message').innerText = '認証に成功しました\nようこそ '+data.user.username+' さん\nあなたのUUIDは: ' + data.user.uuid;
@@ -169,7 +190,7 @@
           }
         } catch (error) {
           console.error('Error:', error);
-          document.getElementById('massage').style.color = 'red';
+          document.getElementById('message').style.color = 'red';
           document.getElementById('message').innerText = '認証状態の確認に失敗しました。';
         }
       }
